@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro Comunitario La Salle Nezahualcóyotl</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ls-blue: #002d56; --ls-red: #a50021; --ls-white: #ffffff;
+            --bg-main: #f4f6f9; --text-main: #1e293b; --text-muted: #64748b;
+            --border-color: #d1d5db; --gradient-ls: linear-gradient(135deg, #002d56 0%, #004b8d 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); overflow-x: hidden; }
+        .hidden { display: none !important; }
+
+        /* --- DASHBOARD --- */
+        #section-app { display: flex; min-height: 100vh; }
+        aside { width: 280px; background-color: var(--ls-blue); padding: 30px 20px; display: flex; flex-direction: column; color: var(--ls-white); position: fixed; height: 100vh; z-index: 100; }
+        
+        /* Estilo del Logo Actualizado */
+        .sidebar-logo { 
+            width: 90px; 
+            height: 90px; 
+            border-radius: 50%; 
+            margin-bottom: 15px; 
+            border: 3px solid var(--ls-red); 
+            background: white; 
+            margin-left: auto; 
+            margin-right: auto; 
+            display: block; 
+            object-fit: contain; /* Para que el logo no se corte */
+            padding: 8px;
+        }
+
+        main { flex-grow: 1; padding: 40px; margin-left: 280px; width: calc(100% - 280px); }
+
+        /* --- INPUTS --- */
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 14px; transition: 0.3s; background-color: #fff; }
+        input:focus { border-color: var(--ls-red); outline: none; box-shadow: 0 0 0 3px rgba(165, 0, 33, 0.1); }
+        label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; color: var(--ls-blue); letter-spacing: 0.5px; }
+
+        /* --- GRÁFICAS --- */
+        .chart-card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #edf2f7; }
+        .bar-container { margin-bottom: 18px; }
+        .bar-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--ls-blue); }
+        .bar-rail { background: #edf2f7; height: 14px; border-radius: 20px; overflow: hidden; position: relative; }
+        .bar-progress { height: 100%; background: var(--gradient-ls); border-radius: 20px; width: 0%; transition: width 1s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+
+        /* --- BOTONES --- */
+        .btn-ls { padding: 12px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; font-family: inherit; font-size: 14px; }
+        .btn-primary { background-color: var(--ls-red); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(165, 0, 33, 0.3); }
+        .nav-btn { background: transparent; color: white; text-align: left; padding: 14px; margin-bottom: 8px; border-radius: 10px; border: none; width: 100%; cursor: pointer; }
+        .nav-btn.active { background: var(--ls-red); font-weight: 700; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        /* --- MODAL --- */
+        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,45,86,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .modal-content { background: white; padding: 35px; border-radius: 20px; max-width: 550px; width: 95%; position: relative; border-top: 8px solid var(--ls-red); max-height: 90vh; overflow-y: auto; }
+        
+        /* --- CÁMARA --- */
+        .camera-box { background: #000; border-radius: 12px; overflow: hidden; position: relative; margin-bottom: 15px; border: 3px solid var(--ls-blue); aspect-ratio: 4/3; max-width: 400px; margin-left: auto; margin-right: auto; display: flex; align-items: center; justify-content: center; }
+        #video-preview, #captured-image { width: 100%; height: 100%; object-fit: cover; }
+
+        .card-asistencia { background: white; padding: 15px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border-left: 6px solid #cbd5e1; border: 1px solid #eee; }
+
+        /* --- LOGIN --- */
+        #section-login { display: flex; align-items: center; justify-content: center; height: 100vh; background: var(--ls-blue); padding: 20px; position: fixed; width: 100%; top: 0; left: 0; z-index: 200; }
+        .login-panel { background: white; padding: 40px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 8px solid var(--ls-red); }
+    </style>
+</head>
+<body>
+
+    <div id="forced-loading" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--ls-blue); z-index:300; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">
+        Verificando sesión...
+    </div>
+
+    <div id="infoModal" class="modal hidden">
+        <div class="modal-content">
+            <span style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; font-weight:bold; color:var(--ls-red)" id="closeModalBtn">×</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="section-login" class="hidden">
+        <div class="login-panel">
+            <img src="https://yt3.googleusercontent.com/ytc/AIdro_nyZ_3hnj11c9_aIwOakVHCqCSlK-JFg43KXeeLg4E-0cM=s900-c-k-c0x00ffffff-no-rj" class="sidebar-logo" alt="Logo">
+            <h2 style="color:var(--ls-blue); margin-bottom:5px; font-weight:800;">CC SABATINO</h2>
+            <p style="color:var(--text-muted); font-size:12px; margin-bottom:25px">Gestión de Alumnos y Talleres</p>
+            <form id="loginForm">
+                <div style="text-align:left; margin-bottom:15px;">
+                    <label>Correo Institucional</label>
+                    <input type="email" id="loginEmail" placeholder="ejemplo@lasalle.edu.mx" required>
+                </div>
+                <div style="text-align:left; margin-bottom:25px;">
+                    <label>Contraseña</label>
+                    <input type="password" id="loginPass" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-ls btn-primary" style="width:100%">ENTRAR AL SISTEMA</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="section-app" class="hidden">
+        <aside>
+            <img src="https://yt3.googleusercontent.com/ytc/AIdro_nyZ_3hnj11c9_aIwOakVHCqCSlK-JFg43KXeeLg4E-0cM=s900-c-k-c0x00ffffff-no-rj" class="sidebar-logo" alt="Logo">
+            <h3 style="text-align:center; font-size:11px; margin-bottom:30px; letter-spacing:1px; font-weight:800; text-transform:uppercase;">La Salle Neza</h3>
+            <nav style="flex-grow: 1;">
+                <button data-page="registro" class="nav-btn nav-link active">📝 Registro Alumnos</button>
+                <button data-page="asistencia" class="nav-btn nav-link">✅ Pase de Lista</button>
+                <button data-page="graficas" class="nav-btn nav-link">📊 Estadísticas</button>
+            </nav>
+            <button id="logoutBtn" class="btn-ls" style="background: rgba(255,255,255,0.1); color:white; width:100%">Cerrar Sesión</button>
+        </aside>
+
+        <main>
+            <div id="page-registro" class="page">
+                <h2 style="color:var(--ls-blue); margin-bottom:25px; font-weight:800;">Inscripción de Alumno</h2>
+                <div style="background:white; padding:35px; border-radius:15px; border:1px solid #e2e8f0;">
+                    <form id="regForm" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px">
+                        <div>
+                            <label>Nombre Completo</label>
+                            <input type="text" id="nombre" placeholder="Solo letras" required oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]/g, '')">
+                        </div>
+                        <div>
+                            <label>Edad</label>
+                            <input type="number" id="edad" min="1" required oninput="if(this.value<1)this.value=''">
+                        </div>
+                        <div>
+                            <label>Teléfono (10 dígitos)</label>
+                            <input type="tel" id="tel" maxlength="10" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                        <div>
+                            <label>Taller</label>
+                            <select id="taller">
+                                <option>Volleyball</option><option>Basketball</option><option>Futbol</option>
+                                <option>Inglés</option><option>Expresión Artística</option>
+                                <option>Experimentos</option><option>Café para Sabios</option>
+                            </select>
+                        </div>
+                        <div style="grid-column: span 2">
+                            <label>Domicilio Completo</label>
+                            <input type="text" id="domicilio" required>
+                        </div>
+                        <div style="grid-column: span 2; text-align:center;">
+                            <label>Fotografía</label>
+                            <div class="camera-box">
+                                <video id="video-preview" autoplay playsinline></video>
+                                <img id="captured-image" class="hidden">
+                            </div>
+                            <div style="display:flex; gap:10px; justify-content:center;">
+                                <button type="button" id="snap" class="btn-ls btn-primary">📸 Capturar</button>
+                                <button type="button" id="retry-photo" class="btn-ls hidden" style="background:#64748b; color:white">🔄 Reintentar</button>
+                            </div>
+                        </div>
+                        <div id="minor-section" class="hidden" style="grid-column: span 2; background:#fff5f5; padding:20px; border-radius:12px; border:1px solid #fed7d7;">
+                            <label style="color:var(--ls-red);">Datos del Tutor (Requerido)</label>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:10px">
+                                <input type="text" id="tutor" placeholder="Nombre Tutor" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]/g, '')">
+                                <input type="tel" id="contutor" maxlength="10" placeholder="Teléfono Tutor" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            </div>
+                        </div>
+                        <div style="grid-column: span 2; margin-top:20px;">
+                            <button type="submit" class="btn-ls btn-primary" style="width:100%; padding:18px;">FINALIZAR INSCRIPCIÓN</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="page-asistencia" class="page hidden">
+                <h2 style="color:var(--ls-blue); margin-bottom:20px; font-weight:800;">Lista de Asistencia</h2>
+                <div id="listaCards" style="display:grid; gap:12px"></div>
+            </div>
+
+            <div id="page-graficas" class="page hidden">
+                <h2 style="color:var(--ls-blue); margin-bottom:25px; font-weight:800;">Estadísticas</h2>
+                <div class="chart-card" id="chartsBody"></div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDAN3YKtCa6QtOUD26HFD4iKXdTtqNEQow",
+            authDomain: "cc-sabatino.firebaseapp.com",
+            databaseURL: "https://cc-sabatino-default-rtdb.firebaseio.com",
+            projectId: "cc-sabatino",
+            storageBucket: "cc-sabatino.firebasestorage.app",
+            messagingSenderId: "572405842697",
+            appId: "1:572405842697:web:841b5514ca9473091e89d8"
+        };
+
+        const firebase = initializeApp(firebaseConfig);
+        const auth = getAuth(firebase);
+        const db = getDatabase(firebase);
+        
+        let stream = null;
+        let currentPhoto = null;
+        let usuarios = [];
+
+        setPersistence(auth, browserSessionPersistence);
+
+        onAuthStateChanged(auth, user => {
+            document.getElementById('forced-loading').classList.add('hidden');
+            if (user) {
+                document.getElementById('section-login').classList.add('hidden');
+                document.getElementById('section-app').classList.remove('hidden');
+                startCamera(); 
+                onValue(ref(db, 'alumnos'), snapshot => {
+                    const data = snapshot.val();
+                    usuarios = data ? Object.keys(data).map(k => ({...data[k], id: k})) : [];
+                    renderAsistencia();
+                    renderCharts();
+                });
+            } else {
+                document.getElementById('section-login').classList.remove('hidden');
+                document.getElementById('section-app').classList.add('hidden');
+                stopCamera();
+            }
+        });
+
+        async function stopCamera() {
+            if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
+        }
+
+        async function startCamera() {
+            if (!document.getElementById('page-registro').classList.contains('hidden') && !currentPhoto) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: { aspectRatio: 4/3 } });
+                    document.getElementById('video-preview').srcObject = stream;
+                } catch (err) { console.error("Error cámara:", err); }
+            }
+        }
+
+        document.getElementById('snap').onclick = () => {
+            const video = document.getElementById('video-preview');
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024; canvas.height = 768; 
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            currentPhoto = canvas.toDataURL('image/jpeg', 0.8);
+            document.getElementById('captured-image').src = currentPhoto;
+            document.getElementById('captured-image').classList.remove('hidden');
+            document.getElementById('video-preview').classList.add('hidden');
+            document.getElementById('snap').classList.add('hidden');
+            document.getElementById('retry-photo').classList.remove('hidden');
+            stopCamera(); 
+        };
+
+        document.getElementById('retry-photo').onclick = () => {
+            currentPhoto = null;
+            document.getElementById('snap').classList.remove('hidden');
+            document.getElementById('retry-photo').classList.add('hidden');
+            document.getElementById('captured-image').classList.add('hidden');
+            document.getElementById('video-preview').classList.remove('hidden');
+            startCamera();
+        };
+
+        document.querySelectorAll('.nav-link').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+                document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+                const target = btn.dataset.page;
+                document.getElementById('page-' + target).classList.remove('hidden');
+                btn.classList.add('active');
+                if(target === 'registro') startCamera(); else stopCamera();
+            };
+        });
+
+        document.getElementById('loginForm').onsubmit = (e) => {
+            e.preventDefault();
+            signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value)
+                .catch(() => alert("Error de acceso."));
+        };
+
+        document.getElementById('logoutBtn').onclick = () => signOut(auth);
+
+        document.getElementById('regForm').onsubmit = async (e) => {
+            e.preventDefault();
+            if(!currentPhoto) return alert("Captura una foto.");
+            const id = Date.now();
+            await set(ref(db, 'alumnos/' + id), {
+                nombre: document.getElementById('nombre').value,
+                edad: document.getElementById('edad').value,
+                tel: document.getElementById('tel').value,
+                taller: document.getElementById('taller').value,
+                domicilio: document.getElementById('domicilio').value,
+                tutor: document.getElementById('tutor').value || "N/A",
+                tel_tutor: document.getElementById('contutor').value || "N/A",
+                foto: currentPhoto,
+                presente: false
+            });
+            alert("Inscrito.");
+            e.target.reset();
+            currentPhoto = null;
+            document.getElementById('retry-photo').click();
+        };
+
+        function renderAsistencia() {
+            const container = document.getElementById('listaCards');
+            container.innerHTML = "";
+            usuarios.forEach(u => {
+                const div = document.createElement('div');
+                div.className = "card-asistencia";
+                div.style.borderLeftColor = u.presente ? '#22c55e' : 'var(--ls-blue)';
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:12px">
+                        <img src="${u.foto}" style="width:45px; height:45px; border-radius:6px; object-fit:cover;">
+                        <div>
+                            <div style="font-weight:700; color:var(--ls-blue)">${u.nombre} <span onclick="window.viewInfo('${u.id}')" style="cursor:pointer; font-size:10px; background:#eee; padding:2px 4px; border-radius:4px">INFO</span></div>
+                            <div style="font-size:11px; color:#64748b">${u.taller}</div>
+                        </div>
+                    </div>
+                    <button class="btn-ls" style="background:${u.presente ? '#22c55e' : '#f1f5f9'}; color:${u.presente ? 'white' : 'black'}" onclick="window.toggleAsis('${u.id}', ${u.presente})">
+                        ${u.presente ? '✓' : 'MARCAR'}
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderCharts() {
+            const container = document.getElementById('chartsBody');
+            container.innerHTML = "";
+            const talleres = ["Volleyball", "Basketball", "Futbol", "Inglés", "Expresión Artística", "Experimentos", "Café para Sabios"];
+            talleres.forEach(t => {
+                const count = usuarios.filter(u => u.taller === t).length;
+                const perc = usuarios.length ? (count / usuarios.length) * 100 : 0;
+                container.innerHTML += `
+                    <div class="bar-container">
+                        <div class="bar-info"><span>${t}</span><span>${count}</span></div>
+                        <div class="bar-rail"><div class="bar-progress" style="width:${perc}%"></div></div>
+                    </div>
+                `;
+            });
+        }
+
+        window.toggleAsis = (id, val) => update(ref(db, 'alumnos/' + id), { presente: !val });
+        window.viewInfo = (id) => {
+            const u = usuarios.find(x => x.id === id);
+            document.getElementById('modalBody').innerHTML = `
+                <div style="text-align:center"><img src="${u.foto}" style="width:150px; border-radius:10px; margin-bottom:15px"></div>
+                <p><b>Nombre:</b> ${u.nombre}</p><p><b>Edad:</b> ${u.edad}</p>
+                <p><b>Tel:</b> ${u.tel}</p><p><b>Tutor:</b> ${u.tutor} (${u.tel_tutor})</p>
+                <button onclick="window.delAlumno('${id}')" style="margin-top:20px; color:red; border:none; background:none; cursor:pointer">ELIMINAR REGISTRO</button>
+            `;
+            document.getElementById('infoModal').classList.remove('hidden');
+        };
+
+        window.delAlumno = (id) => { if(confirm("¿Eliminar?")) remove(ref(db, 'alumnos/' + id)).then(() => document.getElementById('infoModal').classList.add('hidden')); };
+        document.getElementById('closeModalBtn').onclick = () => document.getElementById('infoModal').classList.add('hidden');
+        document.getElementById('edad').oninput = (e) => document.getElementById('minor-section').classList.toggle('hidden', e.target.value >= 18 || e.target.value === "");
+    </script>
+</body>
+</html>
