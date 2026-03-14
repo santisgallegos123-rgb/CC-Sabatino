@@ -54,7 +54,71 @@
 
         #section-login { display: flex; align-items: center; justify-content: center; height: 100vh; background: var(--ls-blue); padding: 20px; position: fixed; width: 100%; top: 0; left: 0; z-index: 200; }
         .login-panel { background: white; padding: 40px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 8px solid var(--ls-red); }
-    </style>
+        /* Estilos para el Chatbot */
+.chat-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    font-family: 'Inter', sans-serif;
+}
+
+.chat-bubble {
+    width: 60px;
+    height: 60px;
+    background: #25d366;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.chat-window {
+    width: 300px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+    margin-bottom: 15px;
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+}
+
+.chat-header {
+    background: var(--ls-blue);
+    color: white;
+    padding: 15px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.chat-body {
+    padding: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #f0f2f5;
+}
+
+.chat-msg {
+    background: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    width: fit-content;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.chat-footer {
+    padding: 10px;
+    display: flex;
+    gap: 5px;
+}
+   </style>
 </head>
 <body>
 
@@ -78,6 +142,19 @@
                 <div style="text-align:left; margin-bottom:15px;">
                     <label>Correo Institucional</label>
                     <input type="email" id="loginEmail" placeholder="ejemplo@lasalle.edu.mx" required>
+                    <div class="chat-container">
+    <div id="chatWindow" class="chat-window">
+        <div class="chat-header">Asistente La Salle</div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-msg">¡Hola! ¿Cómo estás?</div>
+        </div>
+        <div class="chat-footer" id="chatFooter">
+            <input type="tel" id="targetPhone" placeholder="Número a enviar..." style="flex:1">
+            <button id="sendWh" class="btn-ls btn-primary" style="padding: 10px;">➔</button>
+        </div>
+    </div>
+    <div class="chat-bubble" id="toggleChat">💬</div>
+</div>
                 </div>
                 <div style="text-align:left; margin-bottom:25px;">
                     <label>Contraseña</label>
@@ -487,6 +564,41 @@
         window.delAlumno = (id) => { if(confirm("¿Eliminar?")) remove(ref(db, 'alumnos/' + id)).then(() => document.getElementById('infoModal').classList.add('hidden')); };
         document.getElementById('closeModalBtn').onclick = () => document.getElementById('infoModal').classList.add('hidden');
         document.getElementById('edad').oninput = (e) => document.getElementById('minor-section').classList.toggle('hidden', e.target.value >= 18 || e.target.value === "");
-    </script>
+   
+    // Lógica del Chatbot
+const toggleChat = document.getElementById('toggleChat');
+const chatWindow = document.getElementById('chatWindow');
+const sendWh = document.getElementById('sendWh');
+const chatBody = document.getElementById('chatBody');
+
+toggleChat.onclick = () => {
+    const isHidden = chatWindow.style.display === 'none' || chatWindow.style.display === '';
+    chatWindow.style.display = isHidden ? 'flex' : 'none';
+    
+    // Al abrir, preguntar por el número si es la primera vez
+    if(isHidden && chatBody.children.length === 1) {
+        setTimeout(() => {
+            const nextMsg = document.createElement('div');
+            nextMsg.className = 'chat-msg';
+            nextMsg.innerText = 'Por favor, dime el número al que quieres mandar el mensaje:';
+            chatBody.appendChild(nextMsg);
+        }, 800);
+    }
+};
+
+sendWh.onclick = () => {
+    const numDestino = document.getElementById('targetPhone').value.trim();
+    if(numDestino.length < 10) {
+        alert("Por favor ingresa un número válido");
+        return;
+    }
+    
+    // Mensaje fijo: hola
+    const mensaje = encodeURIComponent("hola");
+    // Tu número de origen ya está implícito porque el usuario enviará desde SU sesión de WA abierta
+    const url = `https://wa.me/${numDestino}?text=${mensaje}`;
+    
+    window.open(url, '_blank');
+};</script>
 </body>
 </html>
