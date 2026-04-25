@@ -124,7 +124,7 @@
         <div id="chatWindow" class="chat-window">
             <div class="chat-header">Asistente La Salle</div>
             <div class="chat-body" id="chatBody">
-                <div class="chat-msg">¡Hola! ¿Cómo estás?</div>
+                <div class="chat-msg">¡Hola! ¿Cómo estás? me podrias brindar un numero para mandarte los terminos y condiciones.</div>
             </div>
             <div class="chat-footer" id="chatFooter">
                 <input type="tel" id="targetPhone" placeholder="Número a enviar..." style="flex:1">
@@ -211,7 +211,7 @@
 
                         <div style="grid-column: span 2; text-align:center; border: 2px dashed var(--border-color); padding: 20px; border-radius: 12px;">
                             <label>Escanear Documentos (CURP/Identificación)</label>
-                            <input type="file" id="archivos" accept="image/*,.pdf" style="margin-top:10px;">
+                            <input type="file" id="archivos" accept="image/*,.pdf" multiple style="margin-top:10px;">
                         </div>
                         <div style="grid-column: span 2; text-align:center;">
                             <label>Fotografía</label>
@@ -297,7 +297,6 @@
 
         const getFechaHoy = () => new Date().toISOString().split('T')[0];
 
-        // Llenar selectores de talleres una sola vez
         function populateTalleres() {
             const options = `<option value="">Seleccionar Taller</option>` + talleresLista.map(t => `<option value="${t}">${t}</option>`).join('');
             document.querySelectorAll('.taller-selector').forEach(sel => sel.innerHTML = options);
@@ -423,14 +422,17 @@
             btn.innerText = "Guardando...";
             btn.disabled = true;
 
-            let fileData = "N/A";
+            let fileList = [];
             const fileInput = document.getElementById('archivos');
-            if(fileInput.files[0]) {
-                const reader = new FileReader();
-                fileData = await new Promise(resolve => {
-                    reader.onload = ev => resolve(ev.target.result);
-                    reader.readAsDataURL(fileInput.files[0]);
-                });
+            if(fileInput.files.length > 0) {
+                for(let file of fileInput.files){
+                    const reader = new FileReader();
+                    const b64 = await new Promise(resolve => {
+                        reader.onload = ev => resolve(ev.target.result);
+                        reader.readAsDataURL(file);
+                    });
+                    fileList.push(b64);
+                }
             }
 
             const nuevoAlumnoRef = push(ref(dbMaestra, 'alumnos'));
@@ -443,7 +445,7 @@
                 taller1: document.getElementById('reg-taller1').value,
                 taller2: document.getElementById('reg-taller2').value,
                 taller3: document.getElementById('reg-taller3').value,
-                documento: fileData,
+                documentos: fileList,
                 tutor: document.getElementById('tutor').value || "N/A",
                 parentesco: document.getElementById('parentesco').value || "N/A",
                 tel_tutor: document.getElementById('contutor').value || "N/A",
@@ -475,6 +477,7 @@
                                 <div style="font-size:11px; color:var(--text-muted)">Tel: ${u.tel}</div>
                             </div>
                         </div>
+                        <button class="btn-ls btn-info" style="background:#f1f5f9; color:var(--ls-blue); font-size:12px; padding:5px 10px;">ℹ️ INFO</button>
                     </div>
                     <div class="horarios-grid">
                         ${[1,2,3].map(n => `
@@ -488,6 +491,8 @@
                         `).join('')}
                     </div>`;
                 
+                div.querySelector('.btn-info').onclick = () => window.viewInfo(u.id);
+
                 div.querySelectorAll('.btn-asis').forEach(b => {
                     b.onclick = () => {
                         const n = b.dataset.num;
@@ -532,11 +537,7 @@
             });
 
             doc.save(`Asistencia_${fecha}.pdf`);
-            
-            if(confirm("¿Deseas limpiar la asistencia de Firebase para hoy?")) {
-                await remove(ref(dbAsistencia, `asistencias/${fecha}`));
-                alert("Base de datos de hoy limpiada.");
-            }
+            alert("Reporte descargado.");
         };
 
         function renderCharts(containerId = 'chartsBody') {
