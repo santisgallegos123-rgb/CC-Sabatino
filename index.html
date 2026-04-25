@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Centro Comunitario La Salle Nezahualcóyotl</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         :root {
             --ls-blue: #002d56; --ls-red: #a50021; --ls-white: #ffffff;
@@ -12,6 +15,12 @@
             --border-color: #d1d5db; --gradient-ls: linear-gradient(135deg, #002d56 0%, #004b8d 100%);
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page { animation: fadeIn 0.4s ease; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); overflow-x: hidden; }
         .hidden { display: none !important; }
@@ -26,8 +35,13 @@
 
         main { flex-grow: 1; padding: 40px; margin-left: 280px; width: calc(100% - 280px); }
 
-        input, select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 14px; transition: 0.3s; background-color: #fff; }
-        input:focus, textarea:focus { border-color: var(--ls-red); outline: none; box-shadow: 0 0 0 3px rgba(165, 0, 33, 0.1); }
+        input, select, textarea { 
+            width: 100%; padding: 12px; border-radius: 8px; 
+            border: 1px solid #e2e8f0; 
+            background: #f9fafb;
+            font-size: 14px; transition: 0.3s; 
+        }
+        input:focus, textarea:focus { border-color: var(--ls-red); outline: none; box-shadow: 0 0 0 3px rgba(165, 0, 33, 0.1); background: #fff; }
         label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; color: var(--ls-blue); letter-spacing: 0.5px; }
 
         .chart-card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #edf2f7; margin-bottom: 20px; }
@@ -39,7 +53,9 @@
         .btn-ls { padding: 12px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; font-family: inherit; font-size: 14px; }
         .btn-primary { background-color: var(--ls-red); color: white; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(165, 0, 33, 0.3); }
-        .nav-btn { background: transparent; color: white; text-align: left; padding: 14px; margin-bottom: 8px; border-radius: 10px; border: none; width: 100%; cursor: pointer; }
+        
+        .nav-btn { background: transparent; color: white; text-align: left; padding: 14px; margin-bottom: 8px; border-radius: 10px; border: none; width: 100%; cursor: pointer; transition: 0.3s; }
+        .nav-btn:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
         .nav-btn.active { background: var(--ls-red); font-weight: 700; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
         .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,45,86,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
@@ -51,73 +67,24 @@
         .card-asistencia { background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 10px; }
         .horarios-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 15px; }
         .horario-item { display: flex; flex-direction: column; gap: 5px; }
+        .badge-taller { background: #f1f5f9; padding: 6px; border-radius: 6px; font-size: 12px; border: 1px solid #e2e8f0; color: var(--ls-blue); font-weight: 600; }
 
         #section-login { display: flex; align-items: center; justify-content: center; height: 100vh; background: var(--ls-blue); padding: 20px; position: fixed; width: 100%; top: 0; left: 0; z-index: 200; }
         .login-panel { background: white; padding: 40px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 8px solid var(--ls-red); }
-        /* Estilos para el Chatbot */
-.chat-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-    font-family: 'Inter', sans-serif;
-}
 
-.chat-bubble {
-    width: 60px;
-    height: 60px;
-    background: #25d366;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 30px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
-
-.chat-window {
-    width: 300px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
-    margin-bottom: 15px;
-    overflow: hidden;
-    display: none;
-    flex-direction: column;
-}
-
-.chat-header {
-    background: var(--ls-blue);
-    color: white;
-    padding: 15px;
-    font-weight: bold;
-    font-size: 14px;
-}
-
-.chat-body {
-    padding: 15px;
-    max-height: 200px;
-    overflow-y: auto;
-    background: #f0f2f5;
-}
-
-.chat-msg {
-    background: white;
-    padding: 8px 12px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    font-size: 13px;
-    width: fit-content;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
-
-.chat-footer {
-    padding: 10px;
-    display: flex;
-    gap: 5px;
-}
+        .chat-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; font-family: 'Inter', sans-serif; }
+        .chat-bubble { width: 60px; height: 60px; background: #25d366; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .chat-window { width: 300px; background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); margin-bottom: 15px; overflow: hidden; display: none; flex-direction: column; }
+        .chat-header { background: var(--ls-blue); color: white; padding: 15px; font-weight: bold; font-size: 14px; }
+        .chat-body { padding: 15px; max-height: 200px; overflow-y: auto; background: #f0f2f5; }
+        .chat-msg { background: white; padding: 8px 12px; border-radius: 10px; margin-bottom: 10px; font-size: 13px; width: fit-content; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .chat-footer { padding: 10px; display: flex; gap: 5px; }
+        
+        @media (max-width: 768px) {
+            #regForm { grid-template-columns: 1fr !important; }
+            aside { position: relative; width: 100%; height: auto; }
+            main { margin-left: 0; width: 100%; }
+        }
    </style>
 </head>
 <body>
@@ -142,19 +109,6 @@
                 <div style="text-align:left; margin-bottom:15px;">
                     <label>Correo Institucional</label>
                     <input type="email" id="loginEmail" placeholder="ejemplo@lasalle.edu.mx" required>
-                    <div class="chat-container">
-    <div id="chatWindow" class="chat-window">
-        <div class="chat-header">Asistente La Salle</div>
-        <div class="chat-body" id="chatBody">
-            <div class="chat-msg">¡Hola! ¿Cómo estás?</div>
-        </div>
-        <div class="chat-footer" id="chatFooter">
-            <input type="tel" id="targetPhone" placeholder="Número a enviar..." style="flex:1">
-            <button id="sendWh" class="btn-ls btn-primary" style="padding: 10px;">➔</button>
-        </div>
-    </div>
-    <div class="chat-bubble" id="toggleChat">💬</div>
-</div>
                 </div>
                 <div style="text-align:left; margin-bottom:25px;">
                     <label>Contraseña</label>
@@ -164,6 +118,20 @@
                 <button type="button" id="adminPanelBtn" style="margin-top:15px; background:none; border:none; color:var(--ls-blue); font-weight:bold; cursor:pointer; font-size:12px;">🛡️ ACCESO ADMINISTRADOR</button>
             </form>
         </div>
+    </div>
+
+    <div class="chat-container">
+        <div id="chatWindow" class="chat-window">
+            <div class="chat-header">Asistente La Salle</div>
+            <div class="chat-body" id="chatBody">
+                <div class="chat-msg">¡Hola! ¿Cómo estás?</div>
+            </div>
+            <div class="chat-footer" id="chatFooter">
+                <input type="tel" id="targetPhone" placeholder="Número a enviar..." style="flex:1">
+                <button id="sendWh" class="btn-ls btn-primary" style="padding: 10px;">➔</button>
+            </div>
+        </div>
+        <div class="chat-bubble" id="toggleChat">💬</div>
     </div>
 
     <div id="section-admin" class="hidden">
@@ -189,16 +157,16 @@
     </div>
 
     <div id="section-app" class="hidden">
-        <aside>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Logo_La_Salle.svg/1200px-Logo_La_Salle.svg.png" class="sidebar-logo" alt="Logo">
-            <h3 style="text-align:center; font-size:11px; margin-bottom:30px; letter-spacing:1px; font-weight:800; text-transform:uppercase;">La Salle Neza</h3>
-            <nav style="flex-grow: 1;">
-                <button data-page="registro" class="nav-btn nav-link active">📝 Registro Alumnos</button>
-                <button data-page="asistencia" class="nav-btn nav-link">✅ Pase de Lista</button>
-                <button data-page="graficas" class="nav-btn nav-link">📊 Estadísticas</button>
-            </nav>
-            <button id="logoutBtn" class="btn-ls" style="background: rgba(255,255,255,0.1); color:white; width:100%">Cerrar Sesión</button>
-        </aside>
+    <aside>
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjwslq6JEEXAaocZMSEVHVaIX2X_L8aR0uuw&s" class="sidebar-logo" alt="Logo La Salle">
+        <h3 style="text-align:center; font-size:11px; margin-bottom:30px; letter-spacing:1px; font-weight:800; text-transform:uppercase;">La Salle Neza</h3>
+        <nav style="flex-grow: 1;">
+            <button data-page="registro" class="nav-btn nav-link active">📝 Registro Alumnos</button>
+            <button data-page="asistencia" class="nav-btn nav-link">✅ Pase de Lista</button>
+            <button data-page="graficas" class="nav-btn nav-link">📊 Estadísticas</button>
+        </nav>
+        <button id="logoutBtn" class="btn-ls" style="background: rgba(255,255,255,0.1); color:white; width:100%">Cerrar Sesión</button>
+    </aside>
 
         <main>
             <div id="page-registro" class="page">
@@ -225,10 +193,25 @@
                             <label>Alergias o Condiciones Médicas</label>
                             <textarea id="alergias" placeholder="Especifique si tiene alergias, de lo contrario escriba: NINGUNA" rows="2" required></textarea>
                         </div>
+
+                        <div style="grid-column: span 2; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; background: #f8fafc; padding: 15px; border-radius: 10px;">
+                            <div class="horario-item">
+                                <label>Taller Bloque 1</label>
+                                <select id="reg-taller1" required class="taller-selector"></select>
+                            </div>
+                            <div class="horario-item">
+                                <label>Taller Bloque 2</label>
+                                <select id="reg-taller2" required class="taller-selector"></select>
+                            </div>
+                            <div class="horario-item">
+                                <label>Taller Bloque 3</label>
+                                <select id="reg-taller3" required class="taller-selector"></select>
+                            </div>
+                        </div>
+
                         <div style="grid-column: span 2; text-align:center; border: 2px dashed var(--border-color); padding: 20px; border-radius: 12px;">
                             <label>Escanear Documentos (CURP/Identificación)</label>
                             <input type="file" id="archivos" accept="image/*,.pdf" style="margin-top:10px;">
-                            <p style="font-size:10px; color:var(--text-muted); margin-top:5px;">Formatos permitidos: JPG, PNG, PDF</p>
                         </div>
                         <div style="grid-column: span 2; text-align:center;">
                             <label>Fotografía</label>
@@ -245,21 +228,24 @@
                         <div id="minor-section" class="hidden" style="grid-column: span 2; background:#fff5f5; padding:20px; border-radius:12px; border:1px solid #fed7d7;">
                             <label style="color:var(--ls-red);">Datos del Tutor (Requerido)</label>
                             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-top:10px">
-                                <input type="text" id="tutor" placeholder="Nombre Tutor" oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ ]/g, '')">
-                                <input type="text" id="parentesco" placeholder="Parentesco (Ej. Madre)">
-                                <input type="tel" id="contutor" maxlength="10" placeholder="Teléfono Tutor" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                <input type="text" id="tutor" placeholder="Nombre Tutor">
+                                <input type="text" id="parentesco" placeholder="Parentesco">
+                                <input type="tel" id="contutor" maxlength="10" placeholder="Teléfono Tutor">
                             </div>
                         </div>
 
                         <div style="grid-column: span 2; margin-top:20px;">
-                            <button type="submit" class="btn-ls btn-primary" style="width:100%; padding:18px;">FINALIZAR INSCRIPCIÓN</button>
+                            <button type="submit" id="submitRegBtn" class="btn-ls btn-primary" style="width:100%; padding:18px;">FINALIZAR INSCRIPCIÓN</button>
                         </div>
                     </form>
                 </div>
             </div>
 
             <div id="page-asistencia" class="page hidden">
-                <h2 style="color:var(--ls-blue); margin-bottom:20px; font-weight:800;">Lista de Asistencia por Horarios</h2>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+                    <h2 style="color:var(--ls-blue); font-weight:800;">Lista de Asistencia del Día</h2>
+                    <button id="btnFinalizar" class="btn-ls" style="background:var(--ls-blue); color:white">💾 FINALIZAR Y DESCARGAR PDF</button>
+                </div>
                 <div id="listaCards" style="display:grid; gap:12px"></div>
             </div>
 
@@ -273,9 +259,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove, update, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = {
+        const configBase1 = {
             apiKey: "AIzaSyDAN3YKtCa6QtOUD26HFD4iKXdTtqNEQow",
             authDomain: "cc-sabatino.firebaseapp.com",
             databaseURL: "https://cc-sabatino-default-rtdb.firebaseio.com",
@@ -285,16 +271,39 @@
             appId: "1:572405842697:web:841b5514ca9473091e89d8"
         };
 
-        const firebase = initializeApp(firebaseConfig);
-        const auth = getAuth(firebase);
-        const db = getDatabase(firebase);
+        const configBase2 = {
+            apiKey: "AIzaSyBk9Lo0Vd9yIYNkGv9O-gjFf_r6xJttBxs",
+            authDomain: "asistencia-sabatino.firebaseapp.com",
+            databaseURL: "https://asistencia-sabatino-default-rtdb.firebaseio.com",
+            projectId: "asistencia-sabatino",
+            storageBucket: "asistencia-sabatino.firebasestorage.app",
+            messagingSenderId: "737863414225",
+            appId: "1:737863414225:web:631b55ca6f296f8f95f0f0",
+            measurementId: "G-KZM9FK014T"
+        };
+
+        const appMaestra = initializeApp(configBase1, "maestra");
+        const appAsistencia = initializeApp(configBase2, "asistencia");
+
+        const auth = getAuth(appMaestra);
+        const dbMaestra = getDatabase(appMaestra);
+        const dbAsistencia = getDatabase(appAsistencia);
         
         let stream = null;
         let currentPhoto = null;
         let usuarios = [];
+        let asistenciasHoy = {};
         const talleresLista = ["Volleyball", "Basketball", "Futbol", "Inglés", "Expresión Artística", "Experimentos", "Café para Sabios"];
 
-        // CAMBIO 1: Se usa inMemoryPersistence para forzar el login al recargar
+        const getFechaHoy = () => new Date().toISOString().split('T')[0];
+
+        // Llenar selectores de talleres una sola vez
+        function populateTalleres() {
+            const options = `<option value="">Seleccionar Taller</option>` + talleresLista.map(t => `<option value="${t}">${t}</option>`).join('');
+            document.querySelectorAll('.taller-selector').forEach(sel => sel.innerHTML = options);
+        }
+        populateTalleres();
+
         setPersistence(auth, inMemoryPersistence);
 
         onAuthStateChanged(auth, user => {
@@ -303,13 +312,18 @@
                 document.getElementById('section-login').classList.add('hidden');
                 document.getElementById('section-app').classList.remove('hidden');
                 startCamera(); 
-                onValue(ref(db, 'alumnos'), snapshot => {
+                onValue(ref(dbMaestra, 'alumnos'), snapshot => {
                     const data = snapshot.val();
                     usuarios = data ? Object.keys(data).map(k => ({...data[k], id: k})) : [];
-                    renderAsistencia();
-                    renderCharts();
-                    renderCharts('adminChartsBody');
-                });
+                    
+                    const fecha = getFechaHoy();
+                    onValue(ref(dbAsistencia, `asistencias/${fecha}`), snapAsis => {
+                        asistenciasHoy = snapAsis.val() || {};
+                        renderAsistencia();
+                        renderCharts();
+                        renderCharts('adminChartsBody');
+                    });
+                }, { onlyOnce: false });
             } else {
                 document.getElementById('section-login').classList.remove('hidden');
                 document.getElementById('section-app').classList.add('hidden');
@@ -318,7 +332,6 @@
             }
         });
 
-        // ADMIN PANEL
         document.getElementById('adminPanelBtn').onclick = () => {
             const pass = prompt("Ingrese clave de administrador:");
             if(pass === "admin123") {
@@ -328,49 +341,38 @@
             } else { alert("Acceso denegado"); }
         };
 
-        document.querySelectorAll('.back-to-login').forEach(b => {
-            b.onclick = () => {
-                document.getElementById('section-admin').classList.add('hidden');
-                document.getElementById('section-login').classList.remove('hidden');
-            };
-        });
-
         function loadAdminUsers() {
-            onValue(ref(db, 'alumnos'), snapshot => {
+            onValue(ref(dbMaestra, 'alumnos'), snapshot => {
                 const list = document.getElementById('admin-users-list');
+                if(!list) return;
                 list.innerHTML = "";
                 const data = snapshot.val();
                 if(data) {
                     Object.keys(data).forEach(id => {
                         const u = data[id];
-                        list.innerHTML += `
-                            <div class="card-asistencia" style="display:flex; justify-content:space-between; align-items:center;">
-                                <span><b>${u.nombre}</b></span>
-                                <div style="display:flex; gap:10px">
-                                    <button class="btn-ls" style="background:var(--ls-blue); color:white" onclick="window.viewInfo('${id}')">MODIFICAR / VER</button>
-                                    <button class="btn-ls" style="background:#fee2e2; color:red" onclick="window.delAlumno('${id}')">BAJA</button>
-                                </div>
+                        const div = document.createElement('div');
+                        div.className = "card-asistencia";
+                        div.style.display = "flex";
+                        div.style.justifyContent = "space-between";
+                        div.style.alignItems = "center";
+                        div.innerHTML = `
+                            <span><b>${u.nombre}</b></span>
+                            <div style="display:flex; gap:10px">
+                                <button class="btn-ls btn-view" style="background:var(--ls-blue); color:white">MODIFICAR</button>
+                                <button class="btn-ls btn-del" style="background:#fee2e2; color:red">BAJA</button>
                             </div>
                         `;
+                        div.querySelector('.btn-view').onclick = () => window.viewInfo(id);
+                        div.querySelector('.btn-del').onclick = () => window.delAlumno(id);
+                        list.appendChild(div);
                     });
                 }
-            });
+            }, { onlyOnce: false });
         }
 
-        document.querySelectorAll('.nav-link-admin').forEach(btn => {
-            btn.onclick = () => {
-                document.querySelectorAll('.page-admin').forEach(p => p.classList.add('hidden'));
-                document.querySelectorAll('.nav-link-admin').forEach(b => b.classList.remove('active'));
-                document.getElementById('page-' + btn.dataset.page).classList.remove('hidden');
-                btn.classList.add('active');
-            };
-        });
-
-        async function stopCamera() {
-            if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
-        }
-
+        async function stopCamera() { if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; } }
         async function startCamera() {
+            if (stream) await stopCamera();
             if (!document.getElementById('page-registro').classList.contains('hidden') && !currentPhoto) {
                 try {
                     stream = await navigator.mediaDevices.getUserMedia({ video: { aspectRatio: 4/3 } });
@@ -413,46 +415,44 @@
             };
         });
 
-        document.getElementById('loginForm').onsubmit = (e) => {
-            e.preventDefault();
-            signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value)
-                .catch(() => alert("Error de acceso."));
-        };
-
-        document.getElementById('logoutBtn').onclick = () => signOut(auth);
-
-        // CAMBIO 2: Guardado de todos los datos en Firebase
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
             if(!currentPhoto) return alert("Captura una foto.");
             
+            const btn = document.getElementById('submitRegBtn');
+            btn.innerText = "Guardando...";
+            btn.disabled = true;
+
             let fileData = "N/A";
             const fileInput = document.getElementById('archivos');
             if(fileInput.files[0]) {
                 const reader = new FileReader();
                 fileData = await new Promise(resolve => {
-                    reader.onload = e => resolve(e.target.result);
+                    reader.onload = ev => resolve(ev.target.result);
                     reader.readAsDataURL(fileInput.files[0]);
                 });
             }
 
-            const id = Date.now();
-            await set(ref(db, 'alumnos/' + id), {
+            const nuevoAlumnoRef = push(ref(dbMaestra, 'alumnos'));
+            await set(nuevoAlumnoRef, {
                 nombre: document.getElementById('nombre').value,
                 edad: document.getElementById('edad').value,
                 tel: document.getElementById('tel').value,
                 domicilio: document.getElementById('domicilio').value,
                 alergias: document.getElementById('alergias').value,
+                taller1: document.getElementById('reg-taller1').value,
+                taller2: document.getElementById('reg-taller2').value,
+                taller3: document.getElementById('reg-taller3').value,
                 documento: fileData,
                 tutor: document.getElementById('tutor').value || "N/A",
                 parentesco: document.getElementById('parentesco').value || "N/A",
                 tel_tutor: document.getElementById('contutor').value || "N/A",
-                foto: currentPhoto,
-                asis1: false, taller1: "N/A",
-                asis2: false, taller2: "N/A",
-                asis3: false, taller3: "N/A"
+                foto: currentPhoto
             });
+            
             alert("Inscrito correctamente.");
+            btn.innerText = "FINALIZAR INSCRIPCIÓN";
+            btn.disabled = false;
             e.target.reset();
             currentPhoto = null;
             document.getElementById('retry-photo').click();
@@ -463,73 +463,102 @@
             if(!container) return;
             container.innerHTML = "";
             usuarios.forEach(u => {
+                const asis = asistenciasHoy[u.id] || { asis1:false, asis2:false, asis3:false };
                 const div = document.createElement('div');
                 div.className = "card-asistencia";
-                let options = talleresLista.map(t => `<option value="${t}">${t}</option>`).join('');
                 div.innerHTML = `
                     <div style="display:flex; align-items:center; justify-content:space-between">
                         <div style="display:flex; align-items:center; gap:12px">
                             <img src="${u.foto}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--ls-blue)">
                             <div>
                                 <div style="font-weight:700; color:var(--ls-blue); font-size:16px">${u.nombre}</div>
-                                <button onclick="window.viewInfo('${u.id}')" style="cursor:pointer; font-size:10px; background:var(--ls-blue); color:white; border:none; padding:4px 8px; border-radius:4px; margin-top:4px">VER FICHA COMPLETA</button>
+                                <div style="font-size:11px; color:var(--text-muted)">Tel: ${u.tel}</div>
                             </div>
                         </div>
                     </div>
                     <div class="horarios-grid">
-                        <div class="horario-item">
-                            <label>9:00 - 10:30</label>
-                            <select id="t1-${u.id}">${u.taller1 !== "N/A" ? `<option selected>${u.taller1}</option>` : '<option value="">Elegir Taller</option>'}${options}</select>
-                            <button class="btn-ls" style="background:${u.asis1 ? '#22c55e' : '#f1f5f9'}; color:${u.asis1 ? 'white' : 'black'}" onclick="window.confirmAsis('${u.id}', 1)">${u.asis1 ? '✓ PRESENTE' : 'CONFIRMAR'}</button>
-                        </div>
-                        <div class="horario-item">
-                            <label>11:00 - 12:30</label>
-                            <select id="t2-${u.id}">${u.taller2 !== "N/A" ? `<option selected>${u.taller2}</option>` : '<option value="">Elegir Taller</option>'}${options}</select>
-                            <button class="btn-ls" style="background:${u.asis2 ? '#22c55e' : '#f1f5f9'}; color:${u.asis2 ? 'white' : 'black'}" onclick="window.confirmAsis('${u.id}', 2)">${u.asis2 ? '✓ PRESENTE' : 'CONFIRMAR'}</button>
-                        </div>
-                        <div class="horario-item">
-                            <label>1:00 - 2:00</label>
-                            <select id="t3-${u.id}">${u.taller3 !== "N/A" ? `<option selected>${u.taller3}</option>` : '<option value="">Elegir Taller</option>'}${options}</select>
-                            <button class="btn-ls" style="background:${u.asis3 ? '#22c55e' : '#f1f5f9'}; color:${u.asis3 ? 'white' : 'black'}" onclick="window.confirmAsis('${u.id}', 3)">${u.asis3 ? '✓ PRESENTE' : 'CONFIRMAR'}</button>
-                        </div>
+                        ${[1,2,3].map(n => `
+                            <div class="horario-item">
+                                <label>Bloque ${n}</label>
+                                <div class="badge-taller">${u['taller'+n] || 'No asignado'}</div>
+                                <button class="btn-ls btn-asis" data-num="${n}" style="background:${asis['asis'+n] ? '#22c55e' : '#f1f5f9'}; color:${asis['asis'+n] ? 'white' : 'black'}">
+                                    ${asis['asis'+n] ? '✓ PRESENTE' : 'CONFIRMAR'}
+                                </button>
+                            </div>
+                        `).join('')}
                     </div>`;
+                
+                div.querySelectorAll('.btn-asis').forEach(b => {
+                    b.onclick = () => {
+                        const n = b.dataset.num;
+                        const fecha = getFechaHoy();
+                        const updates = {};
+                        updates[`asis${n}`] = true;
+                        updates[`taller${n}`] = u['taller'+n];
+                        update(ref(dbAsistencia, `asistencias/${fecha}/${u.id}`), updates);
+                    };
+                });
                 container.appendChild(div);
             });
         }
 
-        window.confirmAsis = (id, num) => {
-            const tallerSel = document.getElementById(`t${num}-${id}`).value;
-            if(!tallerSel) return alert("Selecciona un taller primero");
-            const updates = {};
-            updates[`asis${num}`] = true;
-            updates[`taller${num}`] = tallerSel;
-            update(ref(db, 'alumnos/' + id), updates);
+        document.getElementById('btnFinalizar').onclick = async () => {
+            if(Object.keys(asistenciasHoy).length === 0) return alert("No hay asistencias registradas hoy.");
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const fecha = getFechaHoy();
+
+            doc.setFontSize(18);
+            doc.text("Reporte de Asistencia Sabatina", 14, 20);
+            doc.text(`Fecha: ${fecha}`, 14, 30);
+
+            const tableData = usuarios.map(u => {
+                const asis = asistenciasHoy[u.id] || {};
+                return [
+                    u.nombre,
+                    u.taller1 || "N/A", asis.asis1 ? "Presente" : "Falta",
+                    u.taller2 || "N/A", asis.asis2 ? "Presente" : "Falta",
+                    u.taller3 || "N/A", asis.asis3 ? "Presente" : "Falta"
+                ];
+            });
+
+            doc.autoTable({
+                startY: 40,
+                head: [['Alumno', 'Taller 1', 'Asis 1', 'Taller 2', 'Asis 2', 'Taller 3', 'Asis 3']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [0, 45, 86] }
+            });
+
+            doc.save(`Asistencia_${fecha}.pdf`);
+            
+            if(confirm("¿Deseas limpiar la asistencia de Firebase para hoy?")) {
+                await remove(ref(dbAsistencia, `asistencias/${fecha}`));
+                alert("Base de datos de hoy limpiada.");
+            }
         };
 
         function renderCharts(containerId = 'chartsBody') {
             const container = document.getElementById(containerId);
             if(!container) return;
             container.innerHTML = "";
-
             const horarios = [
-                { id: 1, label: "Primer Horario (9:00 - 10:30)", key: "taller1" },
-                { id: 2, label: "Segundo Horario (11:00 - 12:30)", key: "taller2" },
-                { id: 3, label: "Tercer Horario (1:00 - 2:00)", key: "taller3" }
+                { id: 1, label: "9:00 - 10:30", key: "taller1" },
+                { id: 2, label: "11:00 - 12:30", key: "taller2" },
+                { id: 3, label: "1:00 - 2:00", key: "taller3" }
             ];
-
+            const asisData = Object.values(asistenciasHoy);
             horarios.forEach(h => {
                 let section = `<div class="chart-card"><h3>${h.label}</h3><br>`;
                 talleresLista.forEach(t => {
-                    const count = usuarios.filter(u => u[h.key] === t).length;
-                    const perc = usuarios.length ? (count / usuarios.length) * 100 : 0;
-                    section += `
-                        <div class="bar-container">
-                            <div class="bar-info"><span>${t}</span><span>${count} alumnos</span></div>
-                            <div class="bar-rail"><div class="bar-progress" style="width:${perc}%"></div></div>
-                        </div>`;
+                    const count = asisData.filter(a => a[h.key] === t && a['asis'+h.id]).length;
+                    const totalAsistentes = asisData.filter(a => a['asis'+h.id]).length || 1;
+                    const perc = (count / totalAsistentes) * 100;
+                    section += `<div class="bar-container"><div class="bar-info"><span>${t}</span><span>${count}</span></div>
+                                <div class="bar-rail"><div class="bar-progress" style="width:${perc}%"></div></div></div>`;
                 });
-                section += `</div>`;
-                container.innerHTML += section;
+                container.innerHTML += section + `</div>`;
             });
         }
 
@@ -542,63 +571,52 @@
                     <p><b>Alergias:</b> <textarea id="edit-ale">${u.alergias || "Ninguna"}</textarea></p>
                     <p><b>Tel:</b> <input type="text" id="edit-tel" value="${u.tel}"></p>
                     <p><b>Tutor:</b> <input type="text" id="edit-tut" value="${u.tutor}"></p>
-                    ${u.documento && u.documento !== "N/A" ? `<a href="${u.documento}" target="_blank" style="color:blue; font-size:12px; font-weight:bold;">Ver Documento Escaneado</a>` : '<p style="font-size:11px; color:gray">Sin documento adjunto</p>'}
-                    <button class="btn-ls btn-primary" onclick="window.saveEdit('${id}')">GUARDAR CAMBIOS</button>
-                    <button onclick="window.delAlumno('${id}')" style="margin-top:20px; color:red; border:none; background:none; cursor:pointer">ELIMINAR REGISTRO DEFINITIVAMENTE</button>
+                    <button class="btn-ls btn-primary" id="btnSaveEdit">GUARDAR CAMBIOS</button>
                 </div>`;
+            document.getElementById('btnSaveEdit').onclick = () => window.saveEdit(id);
             document.getElementById('infoModal').classList.remove('hidden');
         };
 
         window.saveEdit = (id) => {
-            update(ref(db, 'alumnos/' + id), {
+            update(ref(dbMaestra, 'alumnos/' + id), {
                 nombre: document.getElementById('edit-nom').value,
                 alergias: document.getElementById('edit-ale').value,
                 tel: document.getElementById('edit-tel').value,
                 tutor: document.getElementById('edit-tut').value
-            }).then(() => {
-                alert("Actualizado");
-                document.getElementById('infoModal').classList.add('hidden');
-            });
+            }).then(() => { alert("Actualizado"); document.getElementById('infoModal').classList.add('hidden'); });
         };
 
-        window.delAlumno = (id) => { if(confirm("¿Eliminar?")) remove(ref(db, 'alumnos/' + id)).then(() => document.getElementById('infoModal').classList.add('hidden')); };
+        window.delAlumno = (id) => { if(confirm("¿Eliminar alumno definitivamente?")) remove(ref(dbMaestra, 'alumnos/' + id)); };
         document.getElementById('closeModalBtn').onclick = () => document.getElementById('infoModal').classList.add('hidden');
         document.getElementById('edad').oninput = (e) => document.getElementById('minor-section').classList.toggle('hidden', e.target.value >= 18 || e.target.value === "");
-   
-    // Lógica del Chatbot
-const toggleChat = document.getElementById('toggleChat');
-const chatWindow = document.getElementById('chatWindow');
-const sendWh = document.getElementById('sendWh');
-const chatBody = document.getElementById('chatBody');
-
-toggleChat.onclick = () => {
-    const isHidden = chatWindow.style.display === 'none' || chatWindow.style.display === '';
-    chatWindow.style.display = isHidden ? 'flex' : 'none';
-    
-    // Al abrir, preguntar por el número si es la primera vez
-    if(isHidden && chatBody.children.length === 1) {
-        setTimeout(() => {
-            const nextMsg = document.createElement('div');
-            nextMsg.className = 'chat-msg';
-            nextMsg.innerText = 'Por favor, dime el número al que quieres mandar el mensaje:';
-            chatBody.appendChild(nextMsg);
-        }, 800);
-    }
-};
-
-sendWh.onclick = () => {
-    const numDestino = document.getElementById('targetPhone').value.trim();
-    if(numDestino.length < 10) {
-        alert("Por favor ingresa un número válido");
-        return;
-    }
-    
-    // Mensaje fijo: hola
-const mensaje = encodeURIComponent("https://docs.google.com/document/d/1-BV0RH-qgA4xElBhvWH6FYUIwq4COEZ2Vs_yTZfJkKc/edit?usp=drivesdk");
-    // Tu número de origen ya está implícito porque el usuario enviará desde SU sesión de WA abierta
-    const url = `https://wa.me/${numDestino}?text=${mensaje}`;
-    
-    window.open(url, '_blank');
-};</script>
+        document.getElementById('toggleChat').onclick = () => {
+            const chat = document.getElementById('chatWindow');
+            chat.style.display = (chat.style.display === 'none' || chat.style.display === '') ? 'flex' : 'none';
+        };
+        document.getElementById('sendWh').onclick = () => {
+            const num = document.getElementById('targetPhone').value.trim();
+            if(num.length < 10) return alert("Número inválido");
+            window.open(`https://wa.me/${num}?text=${encodeURIComponent("https://docs.google.com/document/d/1-BV0RH-qgA4xElBhvWH6FYUIwq4COEZ2Vs_yTZfJkKc/edit?usp=drivesdk")}`, '_blank');
+        };
+        document.getElementById('loginForm').onsubmit = (e) => {
+            e.preventDefault();
+            signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(() => alert("Error de acceso."));
+        };
+        document.getElementById('logoutBtn').onclick = () => signOut(auth);
+        document.querySelectorAll('.nav-link-admin').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.page-admin').forEach(p => p.classList.add('hidden'));
+                document.querySelectorAll('.nav-link-admin').forEach(b => b.classList.remove('active'));
+                document.getElementById('page-' + btn.dataset.page).classList.remove('hidden');
+                btn.classList.add('active');
+            };
+        });
+        document.querySelectorAll('.back-to-login').forEach(b => {
+            b.onclick = () => {
+                document.getElementById('section-admin').classList.add('hidden');
+                document.getElementById('section-login').classList.remove('hidden');
+            };
+        });
+    </script>
 </body>
 </html>
