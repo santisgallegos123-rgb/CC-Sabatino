@@ -197,21 +197,22 @@
                         <div style="grid-column: span 2; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; background: #f8fafc; padding: 15px; border-radius: 10px;">
                             <div class="horario-item">
                                 <label>Taller Bloque 1</label>
-                                <select id="reg-taller1" required class="taller-selector"></select>
+                                <select id="reg-taller1" class="taller-selector"></select>
                             </div>
                             <div class="horario-item">
                                 <label>Taller Bloque 2</label>
-                                <select id="reg-taller2" required class="taller-selector"></select>
+                                <select id="reg-taller2" class="taller-selector"></select>
                             </div>
                             <div class="horario-item">
                                 <label>Taller Bloque 3</label>
-                                <select id="reg-taller3" required class="taller-selector"></select>
+                                <select id="reg-taller3" class="taller-selector"></select>
                             </div>
                         </div>
 
                         <div style="grid-column: span 2; text-align:center; border: 2px dashed var(--border-color); padding: 20px; border-radius: 12px;">
                             <label>Escanear Documentos (CURP/Identificación)</label>
                             <input type="file" id="archivos" accept="image/*,.pdf" multiple style="margin-top:10px;">
+                            <div id="preview-archivos" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; justify-content: center;"></div>
                         </div>
                         <div style="grid-column: span 2; text-align:center;">
                             <label>Fotografía</label>
@@ -357,7 +358,7 @@
                         div.innerHTML = `
                             <span><b>${u.nombre}</b></span>
                             <div style="display:flex; gap:10px">
-                                <button class="btn-ls btn-view" style="background:var(--ls-blue); color:white">MODIFICAR</button>
+                                <button class="btn-ls btn-view" style="background:var(--ls-blue); color:white">VER INFO</button>
                                 <button class="btn-ls btn-del" style="background:#fee2e2; color:red">BAJA</button>
                             </div>
                         `;
@@ -414,8 +415,49 @@
             };
         });
 
+        // NUEVO: Manejador para mostrar archivos seleccionados
+        document.getElementById('archivos').addEventListener('change', async function(e) {
+            const container = document.getElementById('preview-archivos');
+            container.innerHTML = "";
+            const files = e.target.files;
+            for (let file of files) {
+                const reader = new FileReader();
+                const fileCard = document.createElement('div');
+                fileCard.style.cssText = "background: white; border: 1px solid #ddd; padding: 8px; border-radius: 8px; font-size: 11px; width: 120px; position: relative; text-align: center;";
+                reader.onload = (event) => {
+                    const isImg = file.type.startsWith('image/');
+                    const content = isImg 
+                        ? `<img src="${event.target.result}" style="width:100%; height:60px; object-fit:cover; border-radius:4px; margin-bottom:5px;">`
+                        : `<div style="font-size:30px; margin-bottom:5px;">📄</div>`;
+                    fileCard.innerHTML = `
+                        ${content}
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${file.name}</div>
+                        <button type="button" class="btn-view-file" style="margin-top:5px; background:var(--ls-blue); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; width:100%">Ver</button>
+                    `;
+                    fileCard.querySelector('.btn-view-file').onclick = () => {
+                        const newTab = window.open();
+                        newTab.document.write(`<iframe src="${event.target.result}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+                    };
+                };
+                reader.readAsDataURL(file);
+                container.appendChild(fileCard);
+            }
+        });
+
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
+
+            // NUEVA VALIDACIÓN TALLERES
+            const t1 = document.getElementById('reg-taller1').value;
+            const t2 = document.getElementById('reg-taller2').value;
+            const t3 = document.getElementById('reg-taller3').value;
+            const seleccionados = [t1, t2, t3].filter(t => t !== "").length;
+
+            if (seleccionados === 0) return alert("Debes seleccionar al menos un taller.");
+            if (seleccionados < 3) {
+                if (!confirm(`Has seleccionado solo ${seleccionados} taller(es). ¿Deseas continuar?`)) return;
+            }
+
             if(!currentPhoto) return alert("Captura una foto.");
             
             const btn = document.getElementById('submitRegBtn');
@@ -456,6 +498,7 @@
             btn.innerText = "FINALIZAR INSCRIPCIÓN";
             btn.disabled = false;
             e.target.reset();
+            document.getElementById('preview-archivos').innerHTML = "";
             currentPhoto = null;
             document.getElementById('retry-photo').click();
         };
@@ -563,28 +606,43 @@
             });
         }
 
+        // NUEVO: MODAL DE INFORMACIÓN COMPLETO
         window.viewInfo = (id) => {
             const u = usuarios.find(x => x.id === id);
-            document.getElementById('modalBody').innerHTML = `
-                <div style="text-align:center"><img src="${u.foto}" style="width:150px; border-radius:10px; margin-bottom:15px"></div>
-                <div style="display:grid; gap:10px">
-                    <p><b>Nombre:</b> <input type="text" id="edit-nom" value="${u.nombre}"></p>
-                    <p><b>Alergias:</b> <textarea id="edit-ale">${u.alergias || "Ninguna"}</textarea></p>
-                    <p><b>Tel:</b> <input type="text" id="edit-tel" value="${u.tel}"></p>
-                    <p><b>Tutor:</b> <input type="text" id="edit-tut" value="${u.tutor}"></p>
-                    <button class="btn-ls btn-primary" id="btnSaveEdit">GUARDAR CAMBIOS</button>
-                </div>`;
-            document.getElementById('btnSaveEdit').onclick = () => window.saveEdit(id);
-            document.getElementById('infoModal').classList.remove('hidden');
-        };
+            if (!u) return;
 
-        window.saveEdit = (id) => {
-            update(ref(dbMaestra, 'alumnos/' + id), {
-                nombre: document.getElementById('edit-nom').value,
-                alergias: document.getElementById('edit-ale').value,
-                tel: document.getElementById('edit-tel').value,
-                tutor: document.getElementById('edit-tut').value
-            }).then(() => { alert("Actualizado"); document.getElementById('infoModal').classList.add('hidden'); });
+            const docsHtml = u.documentos && u.documentos.length > 0 
+                ? u.documentos.map((doc, index) => `
+                    <button onclick="window.open().document.write('<iframe src=\\'${doc}\\' frameborder=\\'0\\' style=\\'border:0; width:100%; height:100%;\\' allowfullscreen></iframe>')" 
+                            style="background:var(--ls-red); color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:10px; margin:2px;">
+                        Ver Doc ${index + 1}
+                    </button>`).join('')
+                : '<span style="color:gray italic">Sin documentos</span>';
+
+            document.getElementById('modalBody').innerHTML = `
+                <div style="text-align:center; margin-bottom:20px;">
+                    <img src="${u.foto}" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid var(--ls-blue);">
+                    <h3 style="color:var(--ls-blue); margin-top:10px;">${u.nombre}</h3>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; font-size:13px;">
+                    <div><label>EDAD</label><p><b>${u.edad} años</b></p></div>
+                    <div><label>TELÉFONO</label><p><b>${u.tel}</b></p></div>
+                    <div style="grid-column: span 2;"><label>DOMICILIO</label><p><b>${u.domicilio}</b></p></div>
+                    <div style="grid-column: span 2; background:#f8fafc; padding:10px; border-radius:8px;">
+                        <label>TALLERES</label>
+                        <ul style="list-style:none; margin-top:5px;">
+                            <li>1️⃣ ${u.taller1 || 'N/A'}</li><li>2️⃣ ${u.taller2 || 'N/A'}</li><li>3️⃣ ${u.taller3 || 'N/A'}</li>
+                        </ul>
+                    </div>
+                    <div style="grid-column: span 2;"><label>ALERGIAS</label><p style="color:var(--ls-red)"><b>${u.alergias || "Ninguna"}</b></p></div>
+                    ${u.tutor !== "N/A" ? `<div style="grid-column: span 2; border-top:1px solid #eee; padding-top:10px;"><label>TUTOR</label><p><b>${u.tutor} (${u.parentesco})</b> - ${u.tel_tutor}</p></div>` : ''}
+                    <div style="grid-column: span 2;"><label>DOCUMENTOS</label><div style="margin-top:5px;">${docsHtml}</div></div>
+                </div>
+                <div style="margin-top:25px; display:flex; gap:10px;">
+                    <button class="btn-ls" onclick="document.getElementById('infoModal').classList.add('hidden')" style="flex:1; background:#64748b; color:white;">Cerrar</button>
+                    <button class="btn-ls btn-primary" onclick="window.delAlumno('${u.id}')" style="flex:1;">Baja Alumno</button>
+                </div>`;
+            document.getElementById('infoModal').classList.remove('hidden');
         };
 
         window.delAlumno = (id) => { if(confirm("¿Eliminar alumno definitivamente?")) remove(ref(dbMaestra, 'alumnos/' + id)); };
