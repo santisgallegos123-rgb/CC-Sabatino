@@ -100,6 +100,75 @@
         </div>
     </div>
 
+    <div id="editModal" class="modal hidden">
+        <div class="modal-content" style="max-width:650px;">
+            <span style="position:absolute; top:15px; right:20px; cursor:pointer; font-size:24px; font-weight:bold; color:var(--ls-red)" id="closeEditModalBtn">×</span>
+            <h3 style="color:var(--ls-blue); margin-bottom:20px; font-weight:800;">✏️ Editar Alumno</h3>
+
+            <div style="text-align:center; margin-bottom:20px;">
+                <img id="edit-foto-preview" src="" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border:3px solid var(--ls-blue); margin-bottom:10px; display:block; margin-left:auto; margin-right:auto;">
+                <label style="cursor:pointer; background:var(--ls-blue); color:white; padding:7px 15px; border-radius:8px; font-size:12px; display:inline-block;">
+                    📷 Cambiar Foto
+                    <input type="file" id="edit-foto-file" accept="image/*" style="display:none;">
+                </label>
+            </div>
+
+            <input type="hidden" id="edit-id">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+                <div><label>Nombre Completo</label><input type="text" id="edit-nombre"></div>
+                <div><label>Edad</label><input type="number" id="edit-edad" min="1"></div>
+                <div><label>Teléfono</label><input type="tel" id="edit-tel" maxlength="10"></div>
+                <div><label>Domicilio</label><input type="text" id="edit-domicilio"></div>
+                <div style="grid-column:span 2;"><label>Alergias / Condiciones</label><textarea id="edit-alergias" rows="2"></textarea></div>
+            </div>
+
+            <div style="background:#f8fafc; padding:15px; border-radius:10px; margin-bottom:15px;">
+                <label style="margin-bottom:10px; display:block;">TALLERES (dar de alta/baja)</label>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                    <div>
+                        <label>Bloque 1</label>
+                        <select id="edit-taller1" class="edit-taller-selector"></select>
+                        <button type="button" class="btn-ls" id="baja-taller1" style="margin-top:6px; background:#fee2e2; color:#c00; font-size:11px; padding:5px 8px; width:100%;">🚫 Dar de Baja</button>
+                    </div>
+                    <div>
+                        <label>Bloque 2</label>
+                        <select id="edit-taller2" class="edit-taller-selector"></select>
+                        <button type="button" class="btn-ls" id="baja-taller2" style="margin-top:6px; background:#fee2e2; color:#c00; font-size:11px; padding:5px 8px; width:100%;">🚫 Dar de Baja</button>
+                    </div>
+                    <div>
+                        <label>Bloque 3</label>
+                        <select id="edit-taller3" class="edit-taller-selector"></select>
+                        <button type="button" class="btn-ls" id="baja-taller3" style="margin-top:6px; background:#fee2e2; color:#c00; font-size:11px; padding:5px 8px; width:100%;">🚫 Dar de Baja</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom:15px;">
+                <label style="margin-bottom:8px; display:block;">DOCUMENTOS</label>
+                <div id="edit-docs-list" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
+                <label style="cursor:pointer; background:#f1f5f9; color:var(--ls-blue); padding:7px 15px; border-radius:8px; font-size:12px; display:inline-block; border:1px dashed var(--ls-blue);">
+                    📎 Agregar Archivos
+                    <input type="file" id="edit-docs-file" accept="image/*,.pdf" multiple style="display:none;">
+                </label>
+            </div>
+
+            <div id="edit-minor-section" style="background:#fff5f5; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #fed7d7;">
+                <label style="color:var(--ls-red); margin-bottom:10px; display:block;">DATOS DEL TUTOR</label>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                    <div><label>Nombre</label><input type="text" id="edit-tutor" placeholder="N/A"></div>
+                    <div><label>Parentesco</label><input type="text" id="edit-parentesco" placeholder="N/A"></div>
+                    <div><label>Teléfono Tutor</label><input type="tel" id="edit-contutor" placeholder="N/A"></div>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:5px;">
+                <button class="btn-ls" id="edit-baja-alumno" style="background:#fee2e2; color:#c00; flex:1;">🚫 Dar de Baja Alumno</button>
+                <button class="btn-ls" id="edit-alta-alumno" style="background:#dcfce7; color:#16a34a; flex:1;">✅ Dar de Alta Alumno</button>
+                <button class="btn-ls btn-primary" id="edit-guardar" style="flex:2;">💾 Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
     <div id="section-login" class="hidden">
         <div class="login-panel">
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjwslq6JEEXAaocZMSEVHVaIX2X_L8aR0uuw&s" class="sidebar-logo" alt="Logo">
@@ -115,7 +184,7 @@
                     <input type="password" id="loginPass" placeholder="••••••••" required>
                 </div>
                 <button type="submit" class="btn-ls btn-primary" style="width:100%">ENTRAR AL SISTEMA</button>
-                <button type="button" id="adminPanelBtn" style="margin-top:15px; background:none; border:none; color:var(--ls-blue); font-weight:bold; cursor:pointer; font-size:12px;">🛡️ ACCESO ADMINISTRADOR</button>
+                <button type="button" id="adminPanelBtn" style="margin-top:14px; background:none; border:1px solid #d1d5db; color:var(--ls-blue); font-weight:700; cursor:pointer; font-size:13px; width:100%; padding:10px; border-radius:8px;">🛡️ ADMINISTRADOR</button>
             </form>
         </div>
     </div>
@@ -134,23 +203,29 @@
         <div class="chat-bubble" id="toggleChat">💬</div>
     </div>
 
-    <div id="section-admin" class="hidden">
+
+
+    <div id="section-admin" class="hidden" style="min-height:100vh;">
         <aside>
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjwslq6JEEXAaocZMSEVHVaIX2X_L8aR0uuw&s" class="sidebar-logo" alt="Logo">
-            <h3 style="text-align:center; font-size:11px; margin-bottom:30px; letter-spacing:1px; font-weight:800; text-transform:uppercase;">Admin Panel</h3>
-            <nav style="flex-grow: 1;">
-                <button data-page="admin-users" class="nav-btn nav-link-admin active">👥 Usuarios Sistema</button>
-                <button data-page="admin-stats" class="nav-btn nav-link-admin">📊 Estadísticas Globales</button>
+            <h3 style="text-align:center; font-size:11px; margin-bottom:8px; letter-spacing:1px; font-weight:800; text-transform:uppercase;">Panel Administrador</h3>
+            <p style="text-align:center; font-size:10px; color:rgba(255,255,255,0.5); margin-bottom:25px;">CC Sabatino</p>
+            <nav style="flex-grow:1;">
+                <button data-page="admin-alumnos" class="nav-btn nav-link-admin active">👥 Alumnos</button>
+                <button data-page="admin-stats" class="nav-btn nav-link-admin">📊 Estadísticas</button>
             </nav>
-            <button class="btn-ls back-to-login" style="background: rgba(255,255,255,0.1); color:white; width:100%">Regresar</button>
+            <button id="adminLogoutBtn" class="btn-ls" style="background:rgba(255,255,255,0.1); color:white; width:100%">← Regresar</button>
         </aside>
         <main>
-            <div id="page-admin-users" class="page-admin">
-                <h2 style="color:var(--ls-blue); margin-bottom:25px; font-weight:800;">Usuarios Inscritos (Control Total)</h2>
-                <div id="admin-users-list" style="display:grid; gap:10px"></div>
+            <div id="page-admin-alumnos" class="page-admin">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; flex-wrap:wrap; gap:10px;">
+                    <h2 style="color:var(--ls-blue); font-weight:800;">👥 Alumnos Registrados</h2>
+                    <input type="text" id="admin-search" placeholder="🔍 Buscar alumno..." style="width:280px;">
+                </div>
+                <div id="admin-alumnos-list" style="display:grid; gap:12px;"></div>
             </div>
             <div id="page-admin-stats" class="page-admin hidden">
-                <h2 style="color:var(--ls-blue); margin-bottom:25px; font-weight:800;">Estadísticas Consolidadas</h2>
+                <h2 style="color:var(--ls-blue); margin-bottom:25px; font-weight:800;">📊 Estadísticas por Horario</h2>
                 <div id="adminChartsBody"></div>
             </div>
         </main>
@@ -259,7 +334,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signInAnonymously, signOut, onAuthStateChanged, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, set, onValue, remove, update, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const configBase1 = {
@@ -283,12 +358,25 @@
             measurementId: "G-KZM9FK014T"
         };
 
+        const configAdmin = {
+            apiKey: "AIzaSyDAN3YKtCa6QtOUD26HFD4iKXdTtqNEQow",
+            authDomain: "cc-sabatino.firebaseapp.com",
+            databaseURL: "https://cc-sabatino-default-rtdb.firebaseio.com",
+            projectId: "cc-sabatino",
+            storageBucket: "cc-sabatino.firebasestorage.app",
+            messagingSenderId: "572405842697",
+            appId: "1:572405842697:web:841b5514ca9473091e89d8"
+        };
+
         const appMaestra = initializeApp(configBase1, "maestra");
         const appAsistencia = initializeApp(configBase2, "asistencia");
+        const appAdmin = initializeApp(configAdmin, "admin");
 
         const auth = getAuth(appMaestra);
         const dbMaestra = getDatabase(appMaestra);
         const dbAsistencia = getDatabase(appAsistencia);
+        const dbAdmin = getDatabase(appAdmin);
+        const authAdmin = getAuth(appAdmin);
         
         let stream = null;
         let currentPhoto = null;
@@ -304,14 +392,20 @@
         }
         populateTalleres();
 
-        setPersistence(auth, inMemoryPersistence);
+        const loadingTimeout = setTimeout(() => {
+            document.getElementById('forced-loading').classList.add('hidden');
+            document.getElementById('section-login').classList.remove('hidden');
+        }, 8000);
+
+        setPersistence(auth, inMemoryPersistence).then(() => {
 
         onAuthStateChanged(auth, user => {
+            clearTimeout(loadingTimeout);
             document.getElementById('forced-loading').classList.add('hidden');
             if (user) {
                 document.getElementById('section-login').classList.add('hidden');
                 document.getElementById('section-app').classList.remove('hidden');
-                startCamera(); 
+                
                 onValue(ref(dbMaestra, 'alumnos'), snapshot => {
                     const data = snapshot.val();
                     usuarios = data ? Object.keys(data).map(k => ({...data[k], id: k})) : [];
@@ -321,64 +415,34 @@
                         asistenciasHoy = snapAsis.val() || {};
                         renderAsistencia();
                         renderCharts();
-                        renderCharts('adminChartsBody');
                     });
                 }, { onlyOnce: false });
             } else {
                 document.getElementById('section-login').classList.remove('hidden');
                 document.getElementById('section-app').classList.add('hidden');
-                document.getElementById('section-admin').classList.add('hidden');
                 stopCamera();
             }
         });
 
-        document.getElementById('adminPanelBtn').onclick = () => {
-            const pass = prompt("Ingrese clave de administrador:");
-            if(pass === "admin123") {
-                document.getElementById('section-login').classList.add('hidden');
-                document.getElementById('section-admin').classList.remove('hidden');
-                loadAdminUsers();
-            } else { alert("Acceso denegado"); }
-        };
-
-        function loadAdminUsers() {
-            onValue(ref(dbMaestra, 'alumnos'), snapshot => {
-                const list = document.getElementById('admin-users-list');
-                if(!list) return;
-                list.innerHTML = "";
-                const data = snapshot.val();
-                if(data) {
-                    Object.keys(data).forEach(id => {
-                        const u = data[id];
-                        const div = document.createElement('div');
-                        div.className = "card-asistencia";
-                        div.style.display = "flex";
-                        div.style.justifyContent = "space-between";
-                        div.style.alignItems = "center";
-                        div.innerHTML = `
-                            <span><b>${u.nombre}</b></span>
-                            <div style="display:flex; gap:10px">
-                                <button class="btn-ls btn-view" style="background:var(--ls-blue); color:white">VER INFO</button>
-                                <button class="btn-ls btn-del" style="background:#fee2e2; color:red">BAJA</button>
-                            </div>
-                        `;
-                        div.querySelector('.btn-view').onclick = () => window.viewInfo(id);
-                        div.querySelector('.btn-del').onclick = () => window.delAlumno(id);
-                        list.appendChild(div);
-                    });
-                }
-            }, { onlyOnce: false });
-        }
+        });
 
         async function stopCamera() { if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; } }
         async function startCamera() {
-            if (stream) await stopCamera();
-            if (!document.getElementById('page-registro').classList.contains('hidden') && !currentPhoto) {
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: { aspectRatio: 4/3 } });
-                    document.getElementById('video-preview').srcObject = stream;
-                } catch (err) { console.error("Error cámara:", err); }
+            // Solo activar cámara si se está visualizando explícitamente la página de REGISTRO
+            const isRegVisible = !document.getElementById('page-registro').classList.contains('hidden');
+            const isAppVisible = !document.getElementById('section-app').classList.contains('hidden');
+            
+            if (!isRegVisible || !isAppVisible) {
+                stopCamera();
+                return;
             }
+
+            if (stream) return; 
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { aspectRatio: 4/3 } });
+                document.getElementById('video-preview').srcObject = stream;
+            } catch (err) { console.error("Error cámara:", err); }
         }
 
         document.getElementById('snap').onclick = () => {
@@ -415,7 +479,6 @@
             };
         });
 
-        // NUEVO: Manejador para mostrar archivos seleccionados
         document.getElementById('archivos').addEventListener('change', async function(e) {
             const container = document.getElementById('preview-archivos');
             container.innerHTML = "";
@@ -447,7 +510,6 @@
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
 
-            // NUEVA VALIDACIÓN TALLERES
             const t1 = document.getElementById('reg-taller1').value;
             const t2 = document.getElementById('reg-taller2').value;
             const t3 = document.getElementById('reg-taller3').value;
@@ -467,9 +529,11 @@
             let fileList = [];
             const fileInput = document.getElementById('archivos');
             if(fileInput.files.length > 0) {
-                for(let file of fileInput.files){
-                    const reader = new FileReader();
+                // Modificado para capturar TODOS los archivos, sin importar el número
+                for(let i = 0; i < fileInput.files.length; i++) {
+                    const file = fileInput.files[i];
                     const b64 = await new Promise(resolve => {
+                        const reader = new FileReader();
                         reader.onload = ev => resolve(ev.target.result);
                         reader.readAsDataURL(file);
                     });
@@ -511,6 +575,7 @@
                 const asis = asistenciasHoy[u.id] || { asis1:false, asis2:false, asis3:false };
                 const div = document.createElement('div');
                 div.className = "card-asistencia";
+                // Modificado: El botón de editar se elimina de la vista de asistencia
                 div.innerHTML = `
                     <div style="display:flex; align-items:center; justify-content:space-between">
                         <div style="display:flex; align-items:center; gap:12px">
@@ -606,7 +671,6 @@
             });
         }
 
-        // NUEVO: MODAL DE INFORMACIÓN COMPLETO
         window.viewInfo = (id) => {
             const u = usuarios.find(x => x.id === id);
             if (!u) return;
@@ -640,7 +704,7 @@
                 </div>
                 <div style="margin-top:25px; display:flex; gap:10px;">
                     <button class="btn-ls" onclick="document.getElementById('infoModal').classList.add('hidden')" style="flex:1; background:#64748b; color:white;">Cerrar</button>
-                    <button class="btn-ls btn-primary" onclick="window.delAlumno('${u.id}')" style="flex:1;">Baja Alumno</button>
+                    ${!document.getElementById('section-admin').classList.contains('hidden') ? `<button class="btn-ls" onclick="document.getElementById('infoModal').classList.add('hidden'); window.openAdminEditModal('${u.id}')" style="flex:1; background:var(--ls-blue); color:white;">✏️ Editar</button>` : ''}
                 </div>`;
             document.getElementById('infoModal').classList.remove('hidden');
         };
@@ -662,20 +726,232 @@
             signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(() => alert("Error de acceso."));
         };
         document.getElementById('logoutBtn').onclick = () => signOut(auth);
+
+        let adminUsuarios = [];
+
+        document.getElementById('adminPanelBtn').onclick = () => {
+            const pass = prompt("Ingrese clave de administrador:");
+            if (pass === "admin123") {
+                stopCamera(); // Asegurar cámara apagada al entrar
+                document.getElementById('section-login').classList.add('hidden');
+                document.getElementById('section-admin').classList.remove('hidden');
+                signInAnonymously(auth).then(() => {
+                    loadAdminAlumnos();
+                }).catch(() => {
+                    loadAdminAlumnos();
+                });
+            } else {
+                alert("Acceso denegado.");
+            }
+        };
+
+        document.getElementById('adminLogoutBtn').onclick = () => {
+            document.getElementById('section-admin').classList.add('hidden');
+            document.getElementById('section-login').classList.remove('hidden');
+        };
+
         document.querySelectorAll('.nav-link-admin').forEach(btn => {
             btn.onclick = () => {
                 document.querySelectorAll('.page-admin').forEach(p => p.classList.add('hidden'));
                 document.querySelectorAll('.nav-link-admin').forEach(b => b.classList.remove('active'));
                 document.getElementById('page-' + btn.dataset.page).classList.remove('hidden');
                 btn.classList.add('active');
+                if (btn.dataset.page === 'admin-stats') renderCharts('adminChartsBody');
             };
         });
-        document.querySelectorAll('.back-to-login').forEach(b => {
-            b.onclick = () => {
-                document.getElementById('section-admin').classList.add('hidden');
-                document.getElementById('section-login').classList.remove('hidden');
+
+        function loadAdminAlumnos() {
+            const container = document.getElementById('admin-alumnos-list');
+            if (container) container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:40px;">⏳ Cargando alumnos...</p>';
+
+            const doLoad = () => {
+                onValue(ref(dbAdmin, 'alumnos'), snapshot => {
+                    const data = snapshot.val();
+                    adminUsuarios = data ? Object.keys(data).map(k => ({...data[k], id: k})) : [];
+                    usuarios = adminUsuarios;
+                    renderAdminAlumnos(adminUsuarios);
+                }, error => {
+                    if (container) container.innerHTML = `<p style="color:var(--ls-red); text-align:center; padding:40px;">❌ Error: ${error.message}</p>`;
+                });
             };
-        });
+
+            signInAnonymously(authAdmin).then(doLoad).catch(doLoad);
+        }
+
+        function saveAdminAlumno(id, updates) {
+            return update(ref(dbAdmin, 'alumnos/' + id), updates);
+        }
+
+        function deleteAdminAlumno(id) {
+            return remove(ref(dbAdmin, 'alumnos/' + id));
+        }        
+
+        function renderAdminAlumnos(lista) {
+            const container = document.getElementById('admin-alumnos-list');
+            if (!container) return;
+            container.innerHTML = '';
+            if (lista.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:40px;">No hay alumnos registrados.</p>';
+                return;
+            }
+            lista.forEach(u => {
+                const div = document.createElement('div');
+                div.className = 'card-asistencia';
+                div.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;';
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:12px; flex:1;">
+                        <img src="${u.foto || 'https://via.placeholder.com/50'}" style="width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--ls-blue); flex-shrink:0;">
+                        <div>
+                            <div style="font-weight:700; color:var(--ls-blue); font-size:15px;">${u.nombre}</div>
+                            <div style="font-size:11px; color:var(--text-muted);">
+                                ${u.edad} años &nbsp;·&nbsp; ${u.tel}<br>
+                                <span style="color:#64748b;">1️⃣ ${u.taller1||'—'} &nbsp; 2️⃣ ${u.taller2||'—'} &nbsp; 3️⃣ ${u.taller3||'—'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-shrink:0;">
+                        <button class="btn-ls btn-admin-info" style="background:#f1f5f9; color:var(--ls-blue); font-size:12px; padding:7px 12px;">ℹ️ Info</button>
+                        <button class="btn-ls btn-admin-edit" style="background:var(--ls-blue); color:white; font-size:12px; padding:7px 12px;">✏️ Editar</button>
+                        <button class="btn-ls btn-admin-del" style="background:#fee2e2; color:#c00; font-size:12px; padding:7px 12px;">🚫 Baja</button>
+                    </div>`;
+                div.querySelector('.btn-admin-info').onclick = () => window.viewInfo(u.id);
+                div.querySelector('.btn-admin-edit').onclick = () => window.openAdminEditModal(u.id);
+                div.querySelector('.btn-admin-del').onclick = () => {
+                    if (confirm(`¿Dar de baja a ${u.nombre}? Se eliminará del sistema.`)) {
+                        deleteAdminAlumno(u.id).then(() => loadAdminAlumnos());
+                    }
+                };
+                container.appendChild(div);
+            });
+        }
+
+        document.getElementById('admin-search').oninput = (e) => {
+            const q = e.target.value.toLowerCase();
+            const filtrados = adminUsuarios.filter(u => u.nombre.toLowerCase().includes(q));
+            renderAdminAlumnos(filtrados);
+        };
+
+        function populateEditTalleres() {
+            const options = `<option value="">Sin Taller</option>` + talleresLista.map(t => `<option value="${t}">${t}</option>`).join('');
+            document.querySelectorAll('.edit-taller-selector').forEach(sel => sel.innerHTML = options);
+        }
+        populateEditTalleres();
+
+        let adminEditFoto = null;
+        let adminEditDocs = [];
+        let adminEditId = null;
+
+        document.getElementById('closeEditModalBtn').onclick = () => document.getElementById('editModal').classList.add('hidden');
+
+        document.getElementById('baja-taller1').onclick = () => { document.getElementById('edit-taller1').value = ''; };
+        document.getElementById('baja-taller2').onclick = () => { document.getElementById('edit-taller2').value = ''; };
+        document.getElementById('baja-taller3').onclick = () => { document.getElementById('edit-taller3').value = ''; };
+
+        document.getElementById('edit-alta-alumno').onclick = () => {
+            alert('El alumno está dado de alta en el sistema.');
+        };
+
+        window.openAdminEditModal = (id) => {
+            const u = adminUsuarios.find(x => x.id === id);
+            if (!u) return;
+            adminEditId = id;
+            adminEditFoto = null;
+            adminEditDocs = [];
+
+            document.getElementById('edit-id').value = u.id;
+            document.getElementById('edit-foto-preview').src = u.foto || '';
+            document.getElementById('edit-nombre').value = u.nombre || '';
+            document.getElementById('edit-edad').value = u.edad || '';
+            document.getElementById('edit-tel').value = u.tel || '';
+            document.getElementById('edit-domicilio').value = u.domicilio || '';
+            document.getElementById('edit-alergias').value = u.alergias || '';
+            document.getElementById('edit-taller1').value = u.taller1 || '';
+            document.getElementById('edit-taller2').value = u.taller2 || '';
+            document.getElementById('edit-taller3').value = u.taller3 || '';
+            document.getElementById('edit-tutor').value = (u.tutor !== 'N/A') ? u.tutor : '';
+            document.getElementById('edit-parentesco').value = (u.parentesco !== 'N/A') ? u.parentesco : '';
+            document.getElementById('edit-contutor').value = (u.tel_tutor !== 'N/A') ? u.tel_tutor : '';
+
+            const docsList = document.getElementById('edit-docs-list');
+            docsList.innerHTML = '';
+            (u.documentos || []).forEach((doc, i) => {
+                const card = document.createElement('div');
+                card.style.cssText = 'background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:8px; text-align:center; width:90px; font-size:11px;';
+                const isImg = doc.startsWith('data:image');
+                card.innerHTML = (isImg ? `<img src="${doc}" style="width:100%;height:55px;object-fit:cover;border-radius:4px;margin-bottom:4px;">` : `<div style="font-size:24px;margin-bottom:4px;">📄</div>`)
+                    + `<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px;">Doc ${i+1}</div>
+                    <button type="button" data-index="${i}" class="admin-del-doc" style="background:#fee2e2;color:#c00;border:none;padding:3px 6px;border-radius:4px;cursor:pointer;font-size:10px;width:100%">🗑️ Quitar</button>`;
+                docsList.appendChild(card);
+            });
+            docsList.querySelectorAll('.admin-del-doc').forEach(btn => {
+                btn.onclick = () => {
+                    const idx = parseInt(btn.dataset.index);
+                    const newDocs = [...(u.documentos || [])];
+                    newDocs.splice(idx, 1);
+                    saveAdminAlumno(id, { documentos: newDocs }).then(() => {
+                        alert('Documento eliminado.');
+                        adminUsuarios = adminUsuarios.map(x => x.id === id ? {...x, documentos: newDocs} : x);
+                        usuarios = adminUsuarios;
+                        window.openAdminEditModal(id);
+                    });
+                };
+            });
+
+            document.getElementById('edit-guardar').onclick = async () => {
+                const btn = document.getElementById('edit-guardar');
+                btn.innerText = 'Guardando...'; btn.disabled = true;
+                const alumno = adminUsuarios.find(x => x.id === adminEditId);
+                const docsFinales = [...(alumno.documentos || []), ...adminEditDocs];
+                const updates = {
+                    nombre: document.getElementById('edit-nombre').value,
+                    edad: document.getElementById('edit-edad').value,
+                    tel: document.getElementById('edit-tel').value,
+                    domicilio: document.getElementById('edit-domicilio').value,
+                    alergias: document.getElementById('edit-alergias').value,
+                    taller1: document.getElementById('edit-taller1').value,
+                    taller2: document.getElementById('edit-taller2').value,
+                    taller3: document.getElementById('edit-taller3').value,
+                    tutor: document.getElementById('edit-tutor').value || 'N/A',
+                    parentesco: document.getElementById('edit-parentesco').value || 'N/A',
+                    tel_tutor: document.getElementById('edit-contutor').value || 'N/A',
+                    documentos: docsFinales,
+                    foto: adminEditFoto || alumno.foto
+                };
+                await saveAdminAlumno(adminEditId, updates);
+                btn.innerText = '💾 Guardar Cambios'; btn.disabled = false;
+                adminEditDocs = []; adminEditFoto = null;
+                alert('Cambios guardados.');
+                document.getElementById('editModal').classList.add('hidden');
+                loadAdminAlumnos();
+            };
+
+            document.getElementById('edit-baja-alumno').onclick = () => {
+                if (confirm(`¿Dar de baja a ${u.nombre}?`)) {
+                    deleteAdminAlumno(adminEditId).then(() => {
+                        document.getElementById('editModal').classList.add('hidden');
+                        loadAdminAlumnos();
+                    });
+                }
+            };
+
+            document.getElementById('edit-foto-file').onchange = (e) => {
+                const file = e.target.files[0]; if (!file) return;
+                const r = new FileReader();
+                r.onload = ev => { adminEditFoto = ev.target.result; document.getElementById('edit-foto-preview').src = adminEditFoto; };
+                r.readAsDataURL(file);
+            };
+
+            document.getElementById('edit-docs-file').onchange = async (e) => {
+                adminEditDocs = [];
+                for (let file of e.target.files) {
+                    const b64 = await new Promise(res => { const r = new FileReader(); r.onload = ev => res(ev.target.result); r.readAsDataURL(file); });
+                    adminEditDocs.push(b64);
+                }
+                alert(`${adminEditDocs.length} archivo(s) listo(s).`);
+            };
+
+            document.getElementById('editModal').classList.remove('hidden');
+        };
     </script>
 </body>
 </html>
